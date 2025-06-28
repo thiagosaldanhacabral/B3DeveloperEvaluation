@@ -1,10 +1,8 @@
-﻿using B3DeveloperEvaluation.Domain.Entities;
+﻿using B3DeveloperEvaluation.Application.Dtos;
 
-namespace B3DeveloperEvaluation.Application.Interfaces
+namespace B3DeveloperEvaluation.Application.Interfaces;
+
+public interface ICalcInvestmentService
 {
-    public interface ICalcInvestmentService
-    {
-        decimal CalculateGross(Investment investment);
-        decimal CalculateNet(Investment investment);
-    }
+    InvestmentResponseDto CalculateReturn(decimal initialAmount, int months);
 }

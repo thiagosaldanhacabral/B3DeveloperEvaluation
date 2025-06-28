@@ -19,11 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="..\..\src\Application\B3DeveloperEvaluation.Application\B3DeveloperEvaluation.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Api\B3DeveloperEvaluation.Api\B3DeveloperEvaluation.Api.csproj" />
+    <Using Include="Xunit" />
   </ItemGroup>
 
 </Project>

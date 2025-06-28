@@ -2,11 +2,15 @@ using B3DeveloperEvaluation.Application.Commands;
 using B3DeveloperEvaluation.Application.Dtos;
 using B3DeveloperEvaluation.Application.Interfaces;
 using B3DeveloperEvaluation.Application.Mappings;
+using B3DeveloperEvaluation.Application.Options;
 using B3DeveloperEvaluation.Application.Services;
 using MediatR;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<ICalcInvestmentService, CalcInvestmentService>();
+builder.Services.Configure<InvestmentRatesOptions>(builder.Configuration);
 
 builder.Services.AddScoped<ICalcInvestmentService, CalcInvestmentService>();
 

@@ -17,14 +17,7 @@ public class CalculateInvestmentCommandHandler(ICalcInvestmentService calcServic
             Months = request.Months
         };
 
-        var gross = _calcService.CalculateGross(investment);
-        var net = _calcService.CalculateNet(investment);
-
-        var response = new InvestmentResponseDto
-        {
-            Gross = gross,
-            Net = net
-        };
+        var response = _calcService.CalculateReturn(investment.Amount, investment.Months);
 
         return Task.FromResult(response);
     }
