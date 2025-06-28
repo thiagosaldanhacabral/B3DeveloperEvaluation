@@ -11,14 +11,22 @@ public class CalculateInvestmentCommandHandler(ICalcInvestmentService calcServic
 
     public Task<InvestmentResponseDto> Handle(CalculateInvestmentCommand request, CancellationToken cancellationToken)
     {
-        var investment = new Domain.Entities.Investment
+        try
         {
-            Amount = request.Amount,
-            Months = request.Months
-        };
+            var investment = new Domain.Entities.Investment
+            {
+                Amount = request.Amount,
+                Months = request.Months
+            };
 
-        var response = _calcService.CalculateReturn(investment.Amount, investment.Months);
+            var response = _calcService.CalculateReturn(investment.Amount, investment.Months);
 
-        return Task.FromResult(response);
+            return Task.FromResult(response);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+            throw new InvalidOperationException("An error occurred while calculating the investment return.", ex);
+        }
     }
 }
