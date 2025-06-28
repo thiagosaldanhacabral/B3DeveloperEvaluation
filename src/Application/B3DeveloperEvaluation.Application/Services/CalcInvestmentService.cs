@@ -1,14 +1,16 @@
 ﻿using B3DeveloperEvaluation.Application.Dtos;
 using B3DeveloperEvaluation.Application.Interfaces;
 using B3DeveloperEvaluation.Application.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace B3DeveloperEvaluation.Application.Services;
 
-public class CalcInvestmentService(IOptions<InvestmentRatesOptions> options) : ICalcInvestmentService
+public class CalcInvestmentService(IOptions<InvestmentRatesOptions> options, ILogger<CalcInvestmentService> logger) : ICalcInvestmentService
 {
     private readonly decimal _cdi = options.Value.Cdi;
     private readonly decimal _tb = options.Value.Tb;
+    private readonly ILogger<CalcInvestmentService> _logger = logger;
 
     /// <summary>
     /// Calculates the tax on profit according to the investment period.
@@ -30,6 +32,8 @@ public class CalcInvestmentService(IOptions<InvestmentRatesOptions> options) : I
     /// </summary>
     public InvestmentResponseDto CalculateReturn(decimal initialAmount, int months)
     {
+        _logger.LogInformation("Calculating return for Amount={Amount}, Months={Months}", initialAmount, months);
+
         if (initialAmount <= 0 || months <= 0)
             throw new ArgumentException("Initial amount and months must be greater than zero.");
 
