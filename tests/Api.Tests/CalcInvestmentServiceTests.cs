@@ -1,5 +1,6 @@
 ﻿using B3DeveloperEvaluation.Application.Options;
 using B3DeveloperEvaluation.Application.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace B3DeveloperEvaluation.Api.Tests;
@@ -9,7 +10,8 @@ public class CalcInvestmentServiceTests
     private static CalcInvestmentService CreateService(decimal cdi = 0.009m, decimal tb = 1.08m)
     {
         var options = Options.Create(new InvestmentRatesOptions { Cdi = cdi, Tb = tb });
-        return new CalcInvestmentService(options);
+        var logger = NullLogger<CalcInvestmentService>.Instance;
+        return new CalcInvestmentService(options, logger);
     }
 
     [Theory]
