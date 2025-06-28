@@ -1,8 +1,7 @@
-﻿namespace B3DeveloperEvaluation.Domain.Entities
+﻿namespace B3DeveloperEvaluation.Domain.Entities;
+
+public class TaxBracket
 {
-    public class TaxBracket
-    {
-        public int UpToMonths { get; set; }
-        public decimal Rate { get; set; }
-    }
+    public int UpToMonths { get; set; }
+    public decimal Rate { get; set; }
 }

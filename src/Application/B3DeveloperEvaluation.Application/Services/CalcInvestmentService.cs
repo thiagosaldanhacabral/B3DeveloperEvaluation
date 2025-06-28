@@ -1,37 +1,54 @@
-﻿using B3DeveloperEvaluation.Application.Interfaces;
-using B3DeveloperEvaluation.Domain.Entities;
+﻿using B3DeveloperEvaluation.Application.Dtos;
+using B3DeveloperEvaluation.Application.Interfaces;
+using B3DeveloperEvaluation.Application.Options;
+using Microsoft.Extensions.Options;
 
 namespace B3DeveloperEvaluation.Application.Services;
 
-public class CalcInvestmentService : ICalcInvestmentService
+public class CalcInvestmentService(IOptions<InvestmentRatesOptions> options) : ICalcInvestmentService
 {
-    private static readonly List<TaxBracket> _brackets =
-        [
-            new TaxBracket { UpToMonths = 6, Rate = 0.225m },
-            new TaxBracket { UpToMonths = 12, Rate = 0.2m },
-            new TaxBracket { UpToMonths = 24, Rate = 0.175m },
-            new TaxBracket { UpToMonths = int.MaxValue, Rate = 0.15m }
-        ];
+    private readonly decimal _cdi = options.Value.Cdi;
+    private readonly decimal _tb = options.Value.Tb;
 
     /// <summary>
-    /// Calculates the gross value of an investment using a fixed monthly rate.
+    /// Calculates the tax on profit according to the investment period.
     /// </summary>
-    public decimal CalculateGross(Investment investment)
+    private static decimal CalculateTax(decimal profit, int months)
     {
-        ArgumentNullException.ThrowIfNull(investment);
-        const decimal monthlyRate = 0.005m;
-        return investment.Amount * (decimal)Math.Pow(1.0 + (double)monthlyRate, investment.Months);
+        decimal rate = months switch
+        {
+            <= 6 => 0.225m,
+            <= 12 => 0.20m,
+            <= 24 => 0.175m,
+            _ => 0.15m
+        };
+        return profit * rate;
     }
 
     /// <summary>
-    /// Calculates the net value of an investment after applying the tax bracket.
+    /// Calculates the investment return after taxes.
     /// </summary>
-    public decimal CalculateNet(Investment investment)
+    public InvestmentResponseDto CalculateReturn(decimal initialAmount, int months)
     {
-        ArgumentNullException.ThrowIfNull(investment);
-        var gross = CalculateGross(investment);
-        var profit = gross - investment.Amount;
-        var bracket = _brackets.First(b => investment.Months <= b.UpToMonths);
-        return profit * (1 - bracket.Rate) + investment.Amount;
+        if (initialAmount <= 0 || months <= 0)
+            throw new ArgumentException("Initial amount and months must be greater than zero.");
+
+        decimal finalAmount = initialAmount;
+        decimal monthlyRate = _cdi * _tb;
+
+        for (int i = 0; i < months; i++)
+            finalAmount *= (1 + monthlyRate);
+
+        decimal grossAmount = finalAmount;
+        decimal profit = grossAmount - initialAmount;
+        decimal tax = CalculateTax(profit, months);
+        decimal netAmount = grossAmount - tax;
+
+        return new InvestmentResponseDto
+        {
+            GrossAmount = decimal.Round(grossAmount, 2),
+            NetAmount = decimal.Round(netAmount, 2),
+            TaxAmount = decimal.Round(tax, 2)
+        };
     }
 }

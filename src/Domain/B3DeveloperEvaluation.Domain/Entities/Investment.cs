@@ -1,8 +1,7 @@
-﻿namespace B3DeveloperEvaluation.Domain.Entities
+﻿namespace B3DeveloperEvaluation.Domain.Entities;
+
+public class Investment
 {
-    public class Investment
-    {
-        public decimal Amount { get; set; }
-        public int Months { get; set; }
-    }
+    public decimal Amount { get; set; }
+    public int Months { get; set; }
 }

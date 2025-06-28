@@ -1,8 +1,8 @@
-﻿namespace B3DeveloperEvaluation.Application.Dtos
+﻿namespace B3DeveloperEvaluation.Application.Dtos;
+
+public class InvestmentResponseDto
 {
-    public record InvestmentResponseDto
-    {
-        public decimal Gross { get; init; }
-        public decimal Net { get; init; }
-    }
+    public decimal GrossAmount { get; init; }
+    public decimal NetAmount { get; init; }
+    public decimal TaxAmount { get; set; }
 }
