@@ -1,4 +1,4 @@
-﻿namespace B3DeveloperEvaluation.Api.Dtos
+﻿namespace B3DeveloperEvaluation.Application.Dtos
 {
     public record InvestmentRequestDto(decimal Amount, int Months);
 }
