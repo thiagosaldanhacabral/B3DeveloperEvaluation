@@ -1,0 +1,22 @@
+services:
+
+  b3-developer-evaluation-api:
+    container_name: b3-developer-evaluation-api
+    build:
+      context: .
+      dockerfile: src/Api/B3DeveloperEvaluation.Api/Dockerfile
+    ports:
+      - "5100:5100"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5100
+      - Cdi=0.009
+      - Tb=1.08
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - b3-network
+
+networks:
+  b3-network:
+    driver: bridge
