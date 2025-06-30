@@ -12,11 +12,10 @@
     <button type="submit">Calcular</button>
   </form>
 
-  <div *ngIf="finalAmount !== null" class="result">
-    <p>Valor Final: <strong>{{ finalAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
-    <p *ngIf="grossAmount !== null">Valor Bruto: <strong>{{ grossAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
-    <p *ngIf="netAmount !== null">Valor Líquido: <strong>{{ netAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
-    <p *ngIf="taxAmount !== null">Imposto: <strong>{{ taxAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+  <div *ngIf="grossAmount !== null" class="result">
+    <p>Valor Bruto: <strong>{{ grossAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+    <p>Valor Líquido: <strong>{{ netAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+    <p>Imposto: <strong>{{ taxAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
   </div>
   <div *ngIf="error" class="error">
     {{ error }}

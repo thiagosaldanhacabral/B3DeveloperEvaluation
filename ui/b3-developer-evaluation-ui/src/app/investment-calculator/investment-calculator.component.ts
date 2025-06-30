@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -11,7 +11,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
   styleUrls: ['./investment-calculator.component.css']
 })
 export class InvestmentCalculatorComponent {
-  initialAmount = 0;
+  initialAmount = 1;
   months = 1;
   finalAmount: number | null = null;
   grossAmount: number | null = null;
@@ -20,12 +20,12 @@ export class InvestmentCalculatorComponent {
   loading = false;
   error: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   calculate() {
     // Validação dos campos
-    if (this.initialAmount <= 0) {
-      this.error = 'O valor inicial deve ser maior que zero.';
+    if (this.initialAmount <= 1) {
+      this.error = 'O valor inicial deve ser maior que 1.';
       return;
     }
     if (this.months < 2) {
@@ -51,6 +51,7 @@ export class InvestmentCalculatorComponent {
         this.taxAmount = response.taxAmount;
         this.finalAmount = response.netAmount;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.error = 'Erro ao calcular investimento.';
