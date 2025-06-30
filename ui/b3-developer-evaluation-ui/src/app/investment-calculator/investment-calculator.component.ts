@@ -12,7 +12,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 })
 export class InvestmentCalculatorComponent {
   initialAmount = 0;
-  months = 12;
+  months = 1;
   finalAmount: number | null = null;
   grossAmount: number | null = null;
   netAmount: number | null = null;
