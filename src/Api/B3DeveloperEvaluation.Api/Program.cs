@@ -40,7 +40,23 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "B3 Developer Evaluation API", Version = "v1" });
 });
 
+// Read CORS origins from configuration (supports comma-separated string)
+var allowedOriginsString = builder.Configuration["Cors:AllowedOrigins"];
+var allowedOrigins = allowedOriginsString?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(allowedOrigins ?? [])
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors();
 
 app.UseSwagger();
 app.UseSwaggerUI();

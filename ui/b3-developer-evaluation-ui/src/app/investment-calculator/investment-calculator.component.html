@@ -1,0 +1,23 @@
+<div class="calculator-container">
+  <h2>Calculadora de Investimentos</h2>
+  <form (ngSubmit)="calculate()">
+    <label>
+      Valor Inicial:
+      <input type="number" [(ngModel)]="initialAmount" name="initialAmount" required />
+    </label>
+    <label>
+      Meses:
+      <input type="number" [(ngModel)]="months" name="months" required />
+    </label>
+    <button type="submit">Calcular</button>
+  </form>
+
+  <div *ngIf="grossAmount !== null" class="result">
+    <p>Valor Bruto: <strong>{{ grossAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+    <p>Valor Líquido: <strong>{{ netAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+    <p>Imposto: <strong>{{ taxAmount | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+  </div>
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>
