@@ -10,12 +10,23 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5100
+      - Cors__AllowedOrigins=http://localhost:4200
       - Cdi=0.009
       - Tb=1.08
     volumes:
       - ./logs:/app/logs
     networks:
       - b3-network
+
+  # b3-developer-evaluation-ui:
+  #   container_name: b3-developer-evaluation-ui
+  #   build:
+  #     context: ./ui/b3-developer-evaluation-ui
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "4200:4200"
+  #   networks:
+  #     - b3-network
 
 networks:
   b3-network:
