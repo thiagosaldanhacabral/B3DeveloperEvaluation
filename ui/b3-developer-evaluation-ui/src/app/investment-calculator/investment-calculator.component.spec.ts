@@ -23,18 +23,18 @@ describe('InvestmentCalculatorComponent', () => {
     httpMock.verify();
   });
 
-  it('deve mostrar erro se valor inicial <= 1', () => {
-    component.initialAmount = 1;
+  it('deve mostrar erro se valor inicial <= 0', () => {
+    component.initialAmount = 0;
     component.months = 5;
     component.calculate();
-    expect(component.error).toBe('O valor inicial deve ser maior que 1.');
+    expect(component.error).toBe('O valor inicial deve ser maior que 0.');
   });
 
-  it('deve mostrar erro se meses < 2', () => {
+  it('deve mostrar erro se meses < 1', () => {
     component.initialAmount = 100;
-    component.months = 1;
+    component.months = 0;
     component.calculate();
-    expect(component.error).toBe('O número de meses deve ser maior que 1.');
+    expect(component.error).toBe('O número de meses deve ser maior que 0.');
   });
 
   it('deve chamar API e preencher valores em caso de sucesso', fakeAsync(() => {
