@@ -12,7 +12,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 })
 export class InvestmentCalculatorComponent {
   initialAmount = 1;
-  months = 1;
+  months = 2;
   finalAmount: number | null = null;
   grossAmount: number | null = null;
   netAmount: number | null = null;
@@ -28,8 +28,8 @@ export class InvestmentCalculatorComponent {
       this.error = 'O valor inicial deve ser maior que 0.';
       return;
     }
-    if (this.months < 1) {
-      this.error = 'O número de meses deve ser maior que 0.';
+    if (this.months < 2) {
+      this.error = 'O número de meses deve ser maior que 1.';
       return;
     }
 

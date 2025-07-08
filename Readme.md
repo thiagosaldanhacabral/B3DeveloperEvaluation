@@ -38,10 +38,16 @@ cd B3DeveloperEvaluation
 ```
 
 ## 2. Executar com Docker
-A aplicação está containerizada e pode ser executada usando Docker Compose. Executar o arquivo start-environment.bat na raiz do solution
-no Terminal como administrador se for no Windows.
-Se for no Linux executar o comando
+A aplicação está containerizada e pode ser executada usando Docker Compose.
 
+Para executar no Windows, abra o Terminal como administrador na raiz do solution e execute:
+
+```Terminal
+.\start-environment.bat
+```
+
+ Para executar no Linux, execute o comando abaixo no bash:
+ 
 ```bash
 chmod +x start-environment.sh
 ```
