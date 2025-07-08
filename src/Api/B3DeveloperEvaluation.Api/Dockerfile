@@ -22,6 +22,12 @@ RUN dotnet publish "B3DeveloperEvaluation.Api.csproj" -c Release -o /app/publish
 
 # Final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Create logs directory and set permissions
+RUN mkdir -p /app/logs && chmod 755 /app/logs
+
+EXPOSE 5100
 ENTRYPOINT ["dotnet", "B3DeveloperEvaluation.Api.dll"]

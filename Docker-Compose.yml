@@ -1,4 +1,54 @@
-services:
+﻿services:
+  postgres-b3:
+    container_name: postgres-b3
+    image: postgres:15
+    environment:
+      POSTGRES_DB: sonar
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - b3-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sonarqube-b3:
+    container_name: sonarqube-b3
+    image: sonarqube:10.7-community
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+      - SONAR_JDBC_URL=jdbc:postgresql://postgres-b3:5432/sonar
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar
+      - sonar.search.javaOpts=-Xms1g -Xmx1g
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/status | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 15
+      start_period: 120s
+    networks:
+      - b3-network
+    depends_on:
+      postgres-b3:
+        condition: service_healthy
 
   b3-developer-evaluation-api:
     container_name: b3-developer-evaluation-api
@@ -10,13 +60,33 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5100
-      - Cors__AllowedOrigins=http://localhost:4200
       - Cdi=0.009
       - Tb=1.08
     volumes:
       - ./logs:/app/logs
     networks:
       - b3-network
+    depends_on:
+      sonarqube-b3:
+        condition: service_healthy
+
+  b3-developer-evaluation-ui:
+    container_name: b3-developer-evaluation-ui
+    build:
+      context: ./ui/b3-developer-evaluation-ui
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    networks:
+      - b3-network
+    depends_on:
+      - b3-developer-evaluation-api
+
+volumes:
+  postgres_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
 
 networks:
   b3-network:

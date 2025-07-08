@@ -24,12 +24,12 @@ export class InvestmentCalculatorComponent {
 
   calculate() {
     // Validação dos campos
-    if (this.initialAmount <= 1) {
-      this.error = 'O valor inicial deve ser maior que 1.';
+    if (this.initialAmount <= 0) {
+      this.error = 'O valor inicial deve ser maior que 0.';
       return;
     }
-    if (this.months < 2) {
-      this.error = 'O número de meses deve ser maior que 1.';
+    if (this.months < 1) {
+      this.error = 'O número de meses deve ser maior que 0.';
       return;
     }
 
