@@ -5,81 +5,82 @@ using B3DeveloperEvaluation.Application.Mappings;
 using B3DeveloperEvaluation.Application.Options;
 using B3DeveloperEvaluation.Application.Services;
 using MediatR;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
-using Microsoft.OpenApi.Models;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Options configuration (binds InvestmentRatesOptions to appsettings.json)
-builder.Services.Configure<InvestmentRatesOptions>(builder.Configuration);
+static void ConfigureServices(WebApplicationBuilder builder)
+{
+    builder.Services.Configure<InvestmentRatesOptions>(builder.Configuration)
+                    .AddScoped<ICalcInvestmentService, CalcInvestmentService>()
+                    .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CalculateInvestmentCommand).Assembly))
+                    .AddAutoMapper(Assembly.GetAssembly(typeof(InvestmentProfile))!)
+                    .AddEndpointsApiExplorer()
+                    .AddSwaggerGen(c =>
+                    {
+                        c.SwaggerDoc("v1", new OpenApiInfo { Title = "B3 Developer Evaluation API", Version = "v1" });
+                    })
+                    .AddCors(options =>
+                    {
+                        options.AddPolicy("AllowAll", policy =>
+                        {
+                            policy.AllowAnyOrigin()
+                                  .AllowAnyMethod()
+                                  .AllowAnyHeader();
+                        });
+                    })
+                    .AddHealthChecks();
+}
 
-// Logger configuration and registration
-var logger = new LoggerConfiguration()
+// Configuração do logger Serilog
+Log.Logger = new LoggerConfiguration()
     .WriteTo.File("logs/api-log-.txt", rollingInterval: RollingInterval.Day)
     .Enrich.FromLogContext()
     .CreateLogger();
 
-Log.Logger = logger;
+builder.Host.UseSerilog(Log.Logger);
 
-builder.Host.UseSerilog(logger);
-
-// Domain services registration
-builder.Services.AddScoped<ICalcInvestmentService, CalcInvestmentService>();
-
-// MediatR registration
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CalculateInvestmentCommand).Assembly));
-
-// AutoMapper registration (using assembly for easier profile management)
-builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(InvestmentProfile))!);
-
-// Swagger configuration
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "B3 Developer Evaluation API", Version = "v1" });
-});
-
-// Read CORS origins from configuration (supports comma-separated string)
-var allowedOriginsString = builder.Configuration["Cors:AllowedOrigins"];
-var allowedOrigins = allowedOriginsString?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins(allowedOrigins ?? [])
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+// Configuração dos serviços
+ConfigureServices(builder);
 
 var app = builder.Build();
 
-app.UseCors();
+// Configuração dos middlewares
+app.UseCors("AllowAll")
+   .UseSwagger()
+   .UseSwaggerUI();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// Endpoint de health check simplificado (para Docker)
+app.MapGet("/health/ready", () => Results.Ok(new { status = "ready", timestamp = DateTime.UtcNow, service = "B3DeveloperEvaluation.Api" }));
 
-// Main endpoint for investment calculation
+// Endpoint de health check para liveness probe
+app.MapGet("/health/live", () => Results.Ok(new { status = "alive", timestamp = DateTime.UtcNow, service = "B3DeveloperEvaluation.Api" }));
+
+// Endpoint principal para cálculo de investimento
 app.MapPost("/calculate", async (InvestmentRequestDto req, IMediator mediator, ILogger<Program> logger) =>
 {
-    if (req == null || req.Amount <= 0 || req.Months <= 0)
+    // Validação dos parâmetros de entrada
+    if (req is not { Amount: > 0, Months: > 0 })
     {
-        logger.LogWarning("Invalid request: {@Request}", req);
-        return Results.BadRequest("Invalid request: Amount and Months must be greater than zero.");
+        logger.LogWarning("Requisição inválida: {@Request}", req);
+        return Results.BadRequest("Requisição inválida: Amount e Months devem ser maiores que zero.");
     }
 
     try
     {
         var response = await mediator.Send(new CalculateInvestmentCommand(req.Amount, req.Months));
-        logger.LogInformation("Calculation successful for Amount={Amount}, Months={Months}", req.Amount, req.Months);
+        logger.LogInformation("Cálculo realizado com sucesso para Amount={Amount}, Months={Months}", req.Amount, req.Months);
         return Results.Ok(response);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Error processing request for Amount={Amount}, Months={Months}", req.Amount, req.Months);
-        return Results.Problem("An unexpected error occurred while processing your request.", statusCode: 500);
+        logger.LogError(ex, "Erro ao processar a requisição para Amount={Amount}, Months={Months}", req.Amount, req.Months);
+        return Results.Problem("Ocorreu um erro inesperado ao processar sua requisição.", statusCode: 500);
     }
 })
 .Produces(StatusCodes.Status200OK)

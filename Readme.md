@@ -14,6 +14,11 @@ Este projeto implementa uma API de cálculo de investimentos usando princípios 
 - NSubstitute para mocking
 - SonarQube para análise de qualidade de código
 
+## UI
+- **Angular 20**: Framework para construção de aplicações web modernas.
+- **Node.js**: Ambiente de execução para JavaScript no backend.
+- **Docker**: Plataforma para criar, rodar e gerenciar containers.
+
 ## Arquitetura
 A solução segue os princípios de Clean Architecture com as seguintes camadas:
 - **API**: Interface HTTP e configuração
@@ -26,63 +31,59 @@ A solução segue os princípios de Clean Architecture com as seguintes camadas:
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
 - [Git](https://git-scm.com/downloads)
 
-## Primeiros Passos
-
-### 1. Clonar o Repositório
+## 1. Clonar o Repositório
 ```bash
 git clone https://github.com/thiagosaldanhacabral/B3DeveloperEvaluation.git
 cd B3DeveloperEvaluation
 ```
 
-### 2. Executar com Docker
-A aplicação está containerizada e pode ser executada usando Docker Compose. Executar o comando abaixo na raiz do solution:
+## 2. Executar com Docker
+A aplicação está containerizada e pode ser executada usando Docker Compose. Executar o arquivo start-environment.bat na raiz do solution
+no Terminal como administrador se for no Windows.
+Se for no Linux executar o comando
+
+```bash
+chmod +x start-environment.sh
+```
+
+Depois
+
+```bash
+./start-environment.sh
+```
+
+Após ser executado o arquivo pela primeira vez, nás próximas pode ser usado o comando abaixo na raiz do solution:
+
 ```bash
 docker-compose up -d
 ```
 
-Isso irá:
-- Construir o container da API
-- Iniciar o serviço na porta 5100
-- Montar um volume para logs
-- Configurar CORS para integração frontend
+### 2.1. Configuração
 
-### 3. Verificar a Instalação
-Uma vez em execução, você pode acessar:
-- Documentação da API: http://localhost:5100/swagger
-- Health Check: http://localhost:5100/health
+Principais configurações no docker-compose.yml:
 
-### 4. Executar Testes
-Para executar os testes unitários:
-```bash
-cd tests/Api.Tests
-dotnet test
+```yaml
+environment:
+  - ASPNETCORE_ENVIRONMENT=Development
+  - ASPNETCORE_URLS=http://+:5100
+  - Cdi=0.009
+  - Tb=1.08
 ```
 
-Para relatório de cobertura de testes:
-```bash
-dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-```
+Onde Cdi é a taxa do CDI e Tb é a taxa do banco
 
-Obs: Recomendado executar o comando abaixo para criar um certificado .NET para ambiente de desenvolvimento
-```bash
-dotnet dev-certs https --trust
-```
+### 2.2 Endpoints de Health Check
 
-## Análise SonarQube
+/health/ready - Verificação de prontidão (para Kubernetes readiness probe)
+/health/live - Verificação de vida (para Kubernetes liveness probe)
 
-### Pré-requisitos
-- Servidor SonarQube em execução (normalmente em http://localhost:9000, caso instalado no Docker)
-- SonarScanner para .NET instalado
+## 3. Configuração do SonarQube (.NET 9)
 
-### Caso não possua nenhum servidor de SonarQube, abaixo instruções para instalar um no Docker
-
-### Instalação e Configuração do SonarQube (.NET 9)
-
-Estas instruções permitem instalar e configurar o SonarQube do zero em ambiente local, mesmo sem experiência prévia com a ferramenta.
+Estas instruções permitem instalar e configurar o SonarQube do zero em ambiente local
 
 ---
 
-### 1. Pré-requisitos
+### 3.1. Pré-requisitos
 
 - **Java 17 ou superior** (SonarQube precisa do Java para rodar)
 - **Docker Desktop** (recomendado para facilitar a instalação)
@@ -91,23 +92,7 @@ Estas instruções permitem instalar e configurar o SonarQube do zero em ambient
 
 ---
 
-### 2. Instalação do SonarQube via Docker
-
-2.1. Abra o terminal ou prompt de comando.
-2.2. Execute o comando abaixo para baixar e iniciar o SonarQube:
-
-```bash
-docker run -d --name sonarqube -p 9000:9000 sonarqube:latest
-```
-
-- Isso fará o download da imagem oficial do SonarQube e iniciará o serviço na porta 9000.
-
-2.3. Aguarde alguns minutos até o SonarQube inicializar.
-   - Verifique acessando: [http://localhost:9000](http://localhost:9000)
-
----
-
-2.4. Primeiro acesso ao SonarQube
+### 3.2. Primeiro acesso ao SonarQube
 
 - Acesse [http://localhost:9000](http://localhost:9000) no navegador.
 - Login padrão:
@@ -126,19 +111,9 @@ docker run -d --name sonarqube -p 9000:9000 sonarqube:latest
 
 ---
 
+### 3.3. Executando Análise
 
-### Executando Análise
-1. Iniciar servidor SonarQube:
-```bash
-docker run -d --name sonarqube -p 9000:9000 sonarqube:latest
-```
-
-2. Instalar SonarScanner (se não estiver instalado):
-```bash
-dotnet tool install --global dotnet-sonarscanner
-```
-
-3. Executar a análise:
+3.3.1. Executar a análise:
 No diretório raiz do solution executar:
 
 ```bash
@@ -147,24 +122,60 @@ dotnet build
 dotnet sonarscanner end /d:sonar.login="seu-token"
 ```
 
-4. Visualizar resultados no painel do SonarQube: http://localhost:9000
+3.3.2. Visualizar resultados no painel do SonarQube: http://localhost:9000
 
 **Obs:** Substituir a URL e o token pelas informações do seu servidor do SonarQube
 
-## Configuração
+## 4. Configuração
+
 Principais configurações no docker-compose.yml:
+
 ```yaml
 environment:
   - ASPNETCORE_ENVIRONMENT=Development
   - ASPNETCORE_URLS=http://+:5100
-  - Cors__AllowedOrigins=http://localhost:4200
   - Cdi=0.009
   - Tb=1.08
 ```
 
 Onde Cdi é a taxa do CDI e Tb é a taxa do banco
 
-## Solução de Problemas
+
+## 5. Verificar a Instalação
+Uma vez em execução, você pode acessar:
+- Documentação da API: http://localhost:5100/swagger
+- Health Check: Executar o curl abaixo:
+
+```PowerShell
+curl -Method GET 'http://localhost:5100/health/ready' -Headers @{ Accept = '*/*' }
+```
+
+```bash
+curl -X GET 'http://localhost:5100/health/ready' -H 'accept: */*'
+
+```
+
+## 6. Executar Testes
+Para executar os testes unitários:
+
+```bash
+cd tests/Api.Tests
+dotnet test
+```
+
+Para relatório de cobertura de testes:
+
+```bash
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+```
+
+Obs: Recomendado executar o comando abaixo para criar um certificado .NET para ambiente de desenvolvimento
+
+```bash
+dotnet dev-certs https --trust
+```
+
+## 7. Solução de Problemas
 1. Se o container Docker falhar ao iniciar:
    - Verifique se o Docker Desktop está em execução
    - Confirme que a porta 5100 não está em uso
@@ -174,93 +185,6 @@ Onde Cdi é a taxa do CDI e Tb é a taxa do banco
    - Certifique-se de que o .NET 9 SDK está instalado
    - Tente limpar a solução: `dotnet clean`
    - Restaure os pacotes: `dotnet restore`
-
-# Instruções para executar a aplicação UI
-
-> Guia simples para rodar o projeto Angular em Docker
-
----
-
-## Tecnologias Utilizadas
-
-- **Angular**: Framework para construção de aplicações web modernas.
-- **Node.js**: Ambiente de execução para JavaScript no backend.
-- **Docker**: Plataforma para criar, rodar e gerenciar containers.
-
----
-
-## Pré-requisitos
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado no seu computador (Windows, Mac ou Linux).
-
----
-
-## Como rodar o projeto usando Docker
-
-1. **Baixe o código do projeto**
-   - Faça o download ou clone este repositório para uma pasta no seu computador.
-
-2. **Abra o terminal**
-   - No Windows, você pode usar o PowerShell. No Mac ou Linux, use o Terminal.
-   - Navegue até a pasta do projeto ui/b3-developer-evaluation-ui. Exemplo:
-
-     ```bash
-     cd caminho/para/a/pasta/ui/b3-developer-evaluation-ui
-     ```
-
-3. **Construa a imagem Docker**
-   - Execute o comando abaixo para criar a imagem do projeto:
-
-     ```bash
-     docker build -t b3-angular-app .
-     ```
-
-4. **Rode o container Docker**
-   - Após a imagem ser criada, execute:
-
-     ```bash
-     docker run --name b3-angular-app -p 4200:4200 b3-angular-app
-     ```
-
-   - Isso fará o site ficar disponível no seu computador.
-
-5. **Abra o navegador**
-   - Acesse: [http://localhost:4200](http://localhost:4200)
-   - Você verá a aplicação Angular rodando.
-
----
-
-## Dicas Úteis
-
-- Para parar o container:
-
-  ```bash
-  docker stop b3-angular-app
-  ```
-
-- Para remover o container:
-
-  ```bash
-  docker rm b3-angular-app
-  ```
-
-- Para remover a imagem:
-
-  ```bash
-  docker rmi b3-angular-app
-  ```
-
----
-
-## Sobre o Dockerfile
-
-O arquivo `Dockerfile` já está configurado para:
-
-- Instalar dependências do Node.js
-- Gerar a versão de produção do Angular
-- Servir a aplicação usando um servidor web leve (Nginx ou similar)
-
-Você não precisa alterar nada para rodar o projeto.
 
 ---
 
